@@ -1,3 +1,4 @@
+import 'package:fitness_tracker_app/core/widgets/delete_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,13 +26,37 @@ class HistoryPage extends ConsumerWidget {
             itemBuilder: (context, index) {
               final activity = items[index];
 
-              return ListTile(
-                leading: const CircleAvatar(child: Icon(Icons.fitness_center)),
+              return Dismissible(
+                key: Key(activity.id),
 
-                title: Text(activity.title),
+                direction: DismissDirection.endToStart,
 
-                subtitle: Text(
-                  "${activity.calories} kcal • ${activity.duration} min",
+                confirmDismiss: (_) async {
+                  return await DeleteDialog.show(context);
+                },
+
+                onDismissed: (_) async {
+                  await ref
+                      .read(deleteActivityUseCaseProvider)
+                      .call(activity.id);
+
+                  ref.invalidate(activitiesProvider);
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Activity deleted")),
+                    );
+                  }
+                },
+
+                background: Container(),
+
+                child: ListTile(
+                  title: Text(activity.title),
+
+                  subtitle: Text(
+                    "${activity.calories} kcal • ${activity.duration} min",
+                  ),
                 ),
               );
             },
