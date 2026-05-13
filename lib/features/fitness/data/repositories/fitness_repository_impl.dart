@@ -21,4 +21,16 @@ class FitnessRepositoryImpl implements FitnessRepository {
 
     return models.map((e) => e.toEntity()).toList();
   }
+
+  @override
+  Future<void> deleteActivity(String id) async {
+    await localDataSource.deleteActivity(id);
+  }
+
+  @override
+  Future<void> updateActivity(FitnessActivityEntity activity) async {
+    final model = FitnessActivityModel.fromEntity(activity);
+
+    await localDataSource.updateActivity(model);
+  }
 }
