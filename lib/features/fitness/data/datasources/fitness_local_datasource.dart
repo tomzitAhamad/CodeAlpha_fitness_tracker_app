@@ -16,4 +16,16 @@ class FitnessLocalDataSource {
 
     return box.values.toList();
   }
+
+  Future<void> deleteActivity(String id) async {
+    final box = await Hive.openBox<FitnessActivityModel>(boxName);
+
+    await box.delete(id);
+  }
+
+  Future<void> updateActivity(FitnessActivityModel activity) async {
+    final box = await Hive.openBox<FitnessActivityModel>(boxName);
+
+    await box.put(activity.id, activity);
+  }
 }
