@@ -1,3 +1,5 @@
+import 'package:fitness_tracker_app/features/fitness/domain/usecases/delete_activity_usecase.dart';
+import 'package:fitness_tracker_app/features/fitness/domain/usecases/update_activity_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/datasources/fitness_local_datasource.dart';
@@ -27,3 +29,10 @@ final activitiesProvider = FutureProvider<List<FitnessActivityEntity>>((
 ) async {
   return ref.read(getActivitiesUseCaseProvider).call();
 });
+final deleteActivityUseCaseProvider = Provider(
+  (ref) => DeleteActivityUseCase(ref.read(repositoryProvider)),
+);
+
+final updateActivityUseCaseProvider = Provider(
+  (ref) => UpdateActivityUseCase(ref.read(repositoryProvider)),
+);
