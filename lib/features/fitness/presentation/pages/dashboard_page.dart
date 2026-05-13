@@ -1,15 +1,20 @@
+import 'package:fitness_tracker_app/features/fitness/presentation/pages/add_activity_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/fitness_provider.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/widgets/section_title.dart';
 import '../widgets/fitness_stat_card.dart';
 import '../widgets/progress_header.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activitiesAsync = ref.watch(activitiesProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Fitness Tracker')),
 
@@ -18,6 +23,7 @@ class DashboardPage extends StatelessWidget {
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+
           children: [
             const ProgressHeader(
               title: "Today's Progress",
@@ -31,36 +37,47 @@ class DashboardPage extends StatelessWidget {
             const SizedBox(height: AppSizes.md),
 
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: AppSizes.md,
-                mainAxisSpacing: AppSizes.md,
+              child: activitiesAsync.when(
+                data: (activities) {
+                  return GridView.count(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: AppSizes.md,
+                    mainAxisSpacing: AppSizes.md,
 
-                children: const [
-                  FitnessStatCard(
-                    title: 'Steps',
-                    value: '5,240',
-                    icon: Icons.directions_walk,
-                  ),
+                    children: [
+                      FitnessStatCard(
+                        title: 'Activities',
+                        value: activities.length.toString(),
+                        icon: Icons.fitness_center,
+                      ),
 
-                  FitnessStatCard(
-                    title: 'Calories',
-                    value: '840',
-                    icon: Icons.local_fire_department,
-                  ),
+                      FitnessStatCard(
+                        title: 'Calories',
+                        value: activities
+                            .fold<int>(0, (sum, item) => sum + item.calories)
+                            .toString(),
+                        icon: Icons.local_fire_department,
+                      ),
 
-                  FitnessStatCard(
-                    title: 'Workout',
-                    value: '45 min',
-                    icon: Icons.fitness_center,
-                  ),
+                      FitnessStatCard(
+                        title: 'Duration',
+                        value:
+                            '${activities.fold<int>(0, (sum, item) => sum + item.duration)} min',
+                        icon: Icons.timer,
+                      ),
 
-                  FitnessStatCard(
-                    title: 'Water',
-                    value: '2.5 L',
-                    icon: Icons.water_drop,
-                  ),
-                ],
+                      const FitnessStatCard(
+                        title: 'Water',
+                        value: '2.5 L',
+                        icon: Icons.water_drop,
+                      ),
+                    ],
+                  );
+                },
+
+                error: (e, _) => Center(child: Text(e.toString())),
+
+                loading: () => const Center(child: CircularProgressIndicator()),
               ),
             ),
           ],
@@ -68,7 +85,12 @@ class DashboardPage extends StatelessWidget {
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddActivityPage()),
+          );
+        },
 
         child: const Icon(Icons.add),
       ),
